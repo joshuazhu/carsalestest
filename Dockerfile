@@ -1,6 +1,5 @@
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /app
-EXPOSE 80
 
 WORKDIR /src
 COPY Carsales.sln ./
@@ -13,17 +12,6 @@ COPY CarsalesTest/*.csproj ./CarsalesTest/
 RUN dotnet restore
 
 COPY . .
-WORKDIR /src/Application
-RUN dotnet build -c Release -o /app
-
-WORKDIR /src/Carsales
-RUN dotnet build -c Release -o /app
-
-WORKDIR /src/Domain
-RUN dotnet build -c Release -o /app
-
-WORKDIR /src/Repository
-RUN dotnet build -c Release -o /app
 
 FROM build AS testrunner
 WORKDIR /src/CarsalesTest
@@ -33,6 +21,18 @@ FROM build AS test
 WORKDIR /src/CarsalesTest
 RUN dotnet test
 
+WORKDIR /src/Application
+RUN dotnet build -c Release -o /app
+
+WORKDIR /src/Domain
+RUN dotnet build -c Release -o /app
+
+WORKDIR /src/Repository
+RUN dotnet build -c Release -o /app
+
+WORKDIR /src/Carsales
+RUN dotnet build -c Release -o /app
+
 FROM build AS publish
 RUN dotnet publish -c Release -o /app
 
@@ -40,3 +40,4 @@ FROM microsoft/dotnet:2.1-aspnetcore-runtime AS runtime
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "Carsales.dll"]
+EXPOSE 80
